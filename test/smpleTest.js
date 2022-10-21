@@ -155,10 +155,33 @@ describe("testing",()=>{
   })
 
   it("is verified function",async()=>{
-    
+    await identityRegistry.connect(agent).registerIdentity(signer1.address,identityHolder1.address,234);
+
+   const check =  await identityRegistry.isVerified(signer1.address);
+
+   expect(check).to.equal(true);
   })
 
-  
+  it("revert if user address is zero address",async ()=>{
+    // const _zeroAddress = 0x0000000000000000000000000000000000000000;
+    expect(await identityRegistry.isVerified(signer1.address)).to.equal(false);
+  })
+})
+describe("trusted issuer registry",()=>{
+  let trustedIssuersRegistry,trusedIssuer1,trusedIssuer2;
 
+  beforeEach(async()=>{
+    [owner,signer1,signer2] = await ethers.getSigners();
+    const TrustedIssuersRegistry = await ethers.getContractFactory("TrustedIssuersRegistry");
+    trustedIssuersRegistry = await TrustedIssuersRegistry.deploy();
 
+    const TrustedIssuer = await ethers.getContractFactory("ClaimIssuer");
+
+    trusedIssuer1 = await TrustedIssuer.deploy(signer1.address);
+    trusedIssuer2 = await TrustedIssuer.deploy(signer2.address);
+  })
+
+  it("add truested issuer to the truested issuer registry",async()=>{
+    await trustedIssuersRegistry.addTrustedIssuer(trusedIssuer1,[1,2,3,4]);
+  })
 })
