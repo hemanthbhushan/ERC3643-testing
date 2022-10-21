@@ -168,6 +168,8 @@ describe("testing",()=>{
     expect(await identityRegistry.isVerified(signer1.address)).to.equal(false);
   })
 })
+
+//test cases for the truested issuer registry
 describe("trusted issuer registry",()=>{
   let trustedIssuersRegistry,trusedIssuer1,trusedIssuer2;
 
