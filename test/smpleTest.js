@@ -171,9 +171,9 @@ describe("trusted issuer registry",()=>{
   let trustedIssuersRegistry,trusedIssuer1,trusedIssuer2;
 
   beforeEach(async()=>{
-    [owner,signer1,signer2] = await ethers.getSigners();
+    [owner,signer,signer1,signer2] = await ethers.getSigners();
     const TrustedIssuersRegistry = await ethers.getContractFactory("TrustedIssuersRegistry");
-    trustedIssuersRegistry = await TrustedIssuersRegistry.deploy();
+    trustedIssuersRegistry = await TrustedIssuersRegistry.connect(signer).deploy();
 
     const TrustedIssuer = await ethers.getContractFactory("ClaimIssuer");
 
@@ -182,6 +182,28 @@ describe("trusted issuer registry",()=>{
   })
 
   it("add truested issuer to the truested issuer registry",async()=>{
-    await trustedIssuersRegistry.addTrustedIssuer(trusedIssuer1,[1,2,3,4]);
+    await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
   })
+
+  it("the claim topic of the trusted issuer should be equal to zero ie he added for the first time as the trusted issuer",async()=>{
+    await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
+    expect(trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[5])).to.be.revertedWith('trusted Issuer already exists');
+  })
+
+  it("claim topic should notbe equal to zero",async()=>{
+    expect(trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[])).to.be.revertedWith('trusted claim topics cannot be empty');
+  })
+
+  it("remove trusted issuer registry",async()=>{
+    await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
+    await trustedIssuersRegistry.connect(signer).removeTrustedIssuer(trusedIssuer1.address);
+    // expect(await trustedIssuersRegistry.getTrustedIssuerClaimTopics(trusedIssuer1.address)).to.equal(0);
+    
+  })
+  // it("to remove trusted issuer registry",async()=>{
+  //   await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
+  //   await trustedIssuersRegistry.connect(signer).removeTrustedIssuer(trusedIssuer1.address);
+  //   expect(await trustedIssuersRegistry.getTrustedIssuerClaimTopics(trusedIssuer1.address)).to.equal(0);
+    
+  // })
 })
