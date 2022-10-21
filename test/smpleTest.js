@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { zeroAddress } = require("ethereumjs-util");
+const { cons } = require("fp-ts/lib/NonEmptyArray2v");
 const { ethers, network } = require("hardhat");
 const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace");
 
@@ -197,13 +198,22 @@ describe("trusted issuer registry",()=>{
   it("remove trusted issuer registry",async()=>{
     await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
     await trustedIssuersRegistry.connect(signer).removeTrustedIssuer(trusedIssuer1.address);
-    // expect(await trustedIssuersRegistry.getTrustedIssuerClaimTopics(trusedIssuer1.address)).to.equal(0);
+    expect(await trustedIssuersRegistry.isTrustedIssuer(trusedIssuer1.address)).to.equal(false);
     
   })
-  // it("to remove trusted issuer registry",async()=>{
-  //   await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
-  //   await trustedIssuersRegistry.connect(signer).removeTrustedIssuer(trusedIssuer1.address);
-  //   expect(await trustedIssuersRegistry.getTrustedIssuerClaimTopics(trusedIssuer1.address)).to.equal(0);
+  it("to remove trusted issuer registry",()=>{
+   
+   expect(trustedIssuersRegistry.connect(signer).removeTrustedIssuer(trusedIssuer1.address)).to.revertedWith('trusted Issuer doesn\'t exist');
     
-  // })
+  })
+
+  it("check the truested have the claim topic",async()=>{
+    await trustedIssuersRegistry.connect(signer).addTrustedIssuer(trusedIssuer1.address,[1,2,3,4]);
+    const check =  await trustedIssuersRegistry.hasClaimTopic(trusedIssuer1.address,1);
+    expect(check).to.equal(true);
+
+    const check1 =  await trustedIssuersRegistry.hasClaimTopic(trusedIssuer1.address,6);
+    expect(check1).to.equal(false);
+
+  })
 })
