@@ -35,7 +35,7 @@ import './Storage.sol';
 import '../roles/AgentRoleUpgradeable.sol';
 
 contract Token is IToken, AgentRoleUpgradeable, TokenStorage {
-
+    bool private initialize;
     /**
      *  @dev the constructor initiates the token contract
      *  msg.sender is set automatically as the owner of the smart contract
@@ -49,6 +49,7 @@ contract Token is IToken, AgentRoleUpgradeable, TokenStorage {
      *  emits an `IdentityRegistryAdded` event
      *  emits a `ComplianceAdded` event
      */
+    
     function init(
         address _identityRegistry,
         address _compliance,
@@ -56,7 +57,10 @@ contract Token is IToken, AgentRoleUpgradeable, TokenStorage {
         string memory _symbol,
         uint8 _decimals,
         address _onchainID
-    ) public initializer {
+    ) public  {
+        if (initialize== false){
+            initialize = true;
+        }
         tokenName = _name;
         tokenSymbol = _symbol;
         tokenDecimals = _decimals;

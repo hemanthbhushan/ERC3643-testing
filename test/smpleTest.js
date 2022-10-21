@@ -50,12 +50,19 @@ describe("testing",()=>{
   let owner;
   let agent;
   let identityHolder1,identityHolder2,identityHolder3;
-
-  
+  let compliance;
+  let _token;
+  let _onChainId;
+  let agentToken;
+  let implementation,implementationAuthority,implementationAuthority1;
+  let proxy;
+  let token;
+  let _identity,_identity1,_identityProxy1,_identityProxy;
 
 
   beforeEach(async ()=>{
-    [owner,signer1,signer2,agent] = await ethers.getSigners();
+    [owner,signer1,signer2,agent,agentToken,identityIssuer] = await ethers.getSigners();
+    accounts = await ethers.getSigners();
 
     const TrustedIssuersRegistry = await ethers.getContractFactory("TrustedIssuersRegistry");
     trustedIssuersRegistry = await TrustedIssuersRegistry.deploy();
@@ -80,11 +87,58 @@ describe("testing",()=>{
     const IdentityHolder = await ethers.getContractFactory("Identity");
      identityHolder1 = await IdentityHolder.deploy(signer1.address,false);
      identityHolder2 = await IdentityHolder.deploy(signer2.address,false);
+  //  //for signer 1
+  //   const Identity = await ethers.getContractFactory("Identity");
+  //   _identity  = await Identity.deploy(signer1.address,true);
+
+  //   const _ImplementationAuthority = await ethers.getContractFactory("ImplementationAuthority");
+  //   implementationAuthority = await _ImplementationAuthority.deploy(_identity.address);
+
+  //   const _IdentityProxy = await ethers.getContractFactory("IdentityProxy");
+
+  //   _identityProxy = await _IdentityProxy.deploy(implementationAuthority.address,signer2.address);
+
+  //   //for signer 2
+  //   // const Identity = await ethers.getContractFactory("Identity");
+  //   _identity1  = await Identity.deploy(signer2.address,true);
+
+  //   const _ImplementationAuthority1 = await ethers.getContractFactory("ImplementationAuthority");
+  //   implementationAuthority1 = await _ImplementationAuthority1.deploy(_identity1.address);
+
+  //   const _IdentityProxy1 = await ethers.getContractFactory("IdentityProxy");
+
+  //   _identityProxy1 = await _IdentityProxy1.deploy(implementationAuthority1.address,signer2.address);
+   //  //for onchain
+     
      
 
 
     await identityRegistryStorage.bindIdentityRegistry(identityRegistry.address);
     await identityRegistry.addAgentOnIdentityRegistryContract(agent.address);
+    // await identityRegistry.connect(agent).registerIdentity(signer1.address,_identityProxy.address,233);
+
+
+
+    const Compliance = await ethers.getContractFactory("DefaultCompliance");
+        compliance = await Compliance.deploy();
+        tokenName = 'TREXToken';
+        tokenSymbol = 'TREX';
+        tokenDecimals = '0';
+        
+        const _Token = await ethers.getContractFactory("Token");
+        _token = await _Token.deploy();
+
+        _onChainId = await IdentityHolder.deploy(_token.address,false);
+    
+    
+        const Implementation = await ethers.getContractFactory("ImplementationAuthority");
+        implementation = await Implementation.deploy(_token.address);
+        console.log("im here");
+    
+        const Proxy = await ethers.getContractFactory("TokenProxy");
+        proxy = await Proxy.deploy( implementation.address,identityRegistry.address,compliance.address,tokenName,tokenSymbol,tokenDecimals,_onChainId.address);
+    
+        token = await _Token.attach(proxy.address);
 
     
     const zeroAddress = 0x0000000000000000000000000000000000000000;
@@ -167,6 +221,14 @@ describe("testing",()=>{
     // const _zeroAddress = 0x0000000000000000000000000000000000000000;
     expect(await identityRegistry.isVerified(signer1.address)).to.equal(false);
   })
+
+  // it.only("checking the mint function",async()=>{
+  //   console.log("im here 333");
+  //   await token.connect(owner).addAgentOnTokenContract(accounts[8].address);
+    
+  //   await token.connect(accounts[8]).mint(signer1.address,111);
+  //   console.log("balance",await token.balanceOf(signer1.address));
+  // })
 })
 
 //test cases for the truested issuer registry
